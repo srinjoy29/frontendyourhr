@@ -32,16 +32,15 @@ const App = () => {
         setUser(response.data.user);
         setIsAuthorized(true);
       } catch (error) {
+        console.error("Fetch user error:", error.response || error.message);
         if (error.response && error.response.status === 401) {
-          // Unauthorized, possibly redirect to login
           setIsAuthorized(false);
-          // Optional: Redirect to login page
-          // window.location.href = "/login";
         } else {
           console.error("An error occurred:", error);
         }
       }
     };
+    
 
     fetchUser();
   }, [isAuthorized, setUser, setIsAuthorized]);
