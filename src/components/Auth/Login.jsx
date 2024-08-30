@@ -9,7 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
-  const { isAuthorized, setIsAuthorized } = useContext(Context);
+  const { isAuthorized, setIsAuthorized, setUser } = useContext(Context);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -27,14 +27,29 @@ const Login = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          withCredentials: true,
         }
       );
+
+      // Store token in localStorage
+      localStorage.setItem('token', data.token);
+      
+      // Optionally fetch user details after login and store them in context
+      const userResponse = await axios.get(
+        "https://yourhr-backend-dsxg.onrender.com/api/v1/user/getuser",
+        {
+          headers: {
+            "Authorization": `Bearer ${data.token}`,
+          },
+        }
+      );
+
+      setUser(userResponse.data.user);
+      setIsAuthorized(true);
+
       toast.success(data.message);
       setEmail("");
       setPassword("");
       setRole("");
-      setIsAuthorized(true);
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
     }

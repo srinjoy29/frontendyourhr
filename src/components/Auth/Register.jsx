@@ -3,7 +3,7 @@ import { FaRegUser } from "react-icons/fa";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { RiLock2Fill } from "react-icons/ri";
 import { FaPencilAlt } from "react-icons/fa";
-import { FaPhoneFlip } from "react-icons/fa6";
+import { FaPhoneFlip } from "react-icons/fa";
 import { Link, Navigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -16,7 +16,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
-  const { isAuthorized, setIsAuthorized, user, setUser } = useContext(Context);
+  const { isAuthorized, setIsAuthorized, setUser } = useContext(Context);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -28,39 +28,52 @@ const Register = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          withCredentials: true,
         }
       );
+
+      // Store token in localStorage
+      localStorage.setItem('token', data.token);
+
+      // Optionally fetch user details after registration and store them in context
+      const userResponse = await axios.get(
+        "https://yourhr-backend-dsxg.onrender.com/api/v1/user/getuser",
+        {
+          headers: {
+            "Authorization": `Bearer ${data.token}`,
+          },
+        }
+      );
+
+      setUser(userResponse.data.user);
+      setIsAuthorized(true);
+
       toast.success(data.message);
       setName("");
       setEmail("");
       setPassword("");
       setPhone("");
       setRole("");
-      setIsAuthorized(true);
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Registration failed");
     }
   };
 
-  if(isAuthorized){
-    return <Navigate to={'/'}/>
+  if (isAuthorized) {
+    return <Navigate to="/" />;
   }
-
 
   return (
     <>
       <section className="authPage">
         <div className="container">
           <div className="header">
-            
             <h3>Create a new account</h3>
           </div>
-          <form>
+          <form onSubmit={handleRegister}>
             <div className="inputTag">
               <label>Register As</label>
               <div>
-                <select value={role} onChange={(e) => setRole(e.target.value)}>
+                <select value={role} onChange={(e) => setRole(e.target.value)} required>
                   <option value="">Select Role</option>
                   <option value="Employer">Employer</option>
                   <option value="Job Seeker">Job Seeker</option>
@@ -76,6 +89,7 @@ const Register = () => {
                   placeholder="ABC"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  required
                 />
                 {/* <FaPencilAlt /> */}
               </div>
@@ -88,6 +102,7 @@ const Register = () => {
                   placeholder="XYZ@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
                 {/* <MdOutlineMailOutline /> */}
               </div>
@@ -96,10 +111,11 @@ const Register = () => {
               <label>Phone Number</label>
               <div>
                 <input
-                  type="number"
+                  type="tel"
                   placeholder="12345678"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  required
                 />
                 {/* <FaPhoneFlip /> */}
               </div>
@@ -112,18 +128,17 @@ const Register = () => {
                   placeholder="Your Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
                 {/* <RiLock2Fill /> */}
               </div>
             </div>
-            <button type="submit" onClick={handleRegister}>
-              Register
-            </button>
-            <Link to={"/login"}>Login Now</Link>
+            <button type="submit">Register</button>
+            <Link to="/login">Login Now</Link>
           </form>
         </div>
         <div className="banner">
-          <img src="/register.png" alt="login" />
+          <img src="/register.png" alt="register" />
         </div>
       </section>
     </>

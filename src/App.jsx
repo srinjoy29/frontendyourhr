@@ -22,11 +22,19 @@ const App = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIsAuthorized(false);
+        return;
+      }
+
       try {
         const response = await axios.get(
           "https://yourhr-backend-dsxg.onrender.com/api/v1/user/getuser",
           {
-            withCredentials: true,
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
           }
         );
         setUser(response.data.user);
@@ -35,12 +43,12 @@ const App = () => {
         console.error("Fetch user error:", error.response || error.message);
         if (error.response && error.response.status === 401) {
           setIsAuthorized(false);
+          localStorage.removeItem('token'); // Clear token on unauthorized error
         } else {
           console.error("An error occurred:", error);
         }
       }
     };
-    
 
     fetchUser();
   }, [isAuthorized, setUser, setIsAuthorized]);
