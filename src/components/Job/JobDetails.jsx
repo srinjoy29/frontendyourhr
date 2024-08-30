@@ -3,28 +3,46 @@ import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Context } from "../../main";
+
 const JobDetails = () => {
   const { id } = useParams();
   const [job, setJob] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigateTo = useNavigate();
-
-  const { isAuthorized, user } = useContext(Context);
+  const { isAuthorized, token, user } = useContext(Context); // Added token from context
 
   useEffect(() => {
-    axios
-      .get(`https://yourhr-backend-dsxg.onrender.com/api/v1/job/${id}`, {
-        withCredentials: true,
-      })
-      .then((res) => {
-        setJob(res.data.job);
-      })
-      .catch((error) => {
-        navigateTo("/notfound");
-      });
-  }, []);
+    if (!isAuthorized) {
+      navigateTo("/login");
+      return;
+    }
 
-  if (!isAuthorized) {
-    navigateTo("/login");
+    const fetchJob = async () => {
+      try {
+        const response = await axios.get(`https://yourhr-backend-dsxg.onrender.com/api/v1/job/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Use JWT token in the Authorization header
+          },
+        });
+        setJob(response.data.job);
+      } catch (error) {
+        setError("Failed to fetch job details");
+        navigateTo("/notfound");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [id, isAuthorized, navigateTo, token]); // Added token to dependencies
+
+  if (loading) {
+    return <div>Loading...</div>; // Replace with a spinner or a more sophisticated loading component
+  }
+
+  if (error) {
+    return <div>{error}</div>;
   }
 
   return (
@@ -33,7 +51,7 @@ const JobDetails = () => {
         <h3>Job Details</h3>
         <div className="banner">
           <p>
-            Title: <span> {job.title}</span>
+            Title: <span>{job.title}</span>
           </p>
           <p>
             Category: <span>{job.category}</span>
@@ -66,7 +84,7 @@ const JobDetails = () => {
           {user && user.role === "Employer" ? (
             <></>
           ) : (
-            <Link to={`/application/${job._id}`}>Apply Now</Link>
+            <Link to={`/application/${job._id}`} className="apply-button">Apply Now</Link>
           )}
         </div>
       </div>

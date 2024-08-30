@@ -3,7 +3,8 @@ import React, { useContext, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { Context } from "../../main";
-import bg3image from "../../assets/resume2.png"
+import bg3image from "../../assets/resume2.png";
+
 const Application = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -13,18 +14,24 @@ const Application = () => {
   const [resume, setResume] = useState(null);
 
   const { isAuthorized, user } = useContext(Context);
+  const navigate = useNavigate();
+  const { id } = useParams();
 
-  const navigateTo = useNavigate();
-
-  // Function to handle file input changes
+  // Handle file input changes
   const handleFileChange = (event) => {
-    const resume = event.target.files[0];
-    setResume(resume);
+    const file = event.target.files[0];
+    setResume(file);
   };
 
-  const { id } = useParams();
+  // Handle application submission
   const handleApplication = async (e) => {
     e.preventDefault();
+
+    if (!resume) {
+      toast.error("Please upload your resume");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("name", name);
     formData.append("email", email);
@@ -35,45 +42,51 @@ const Application = () => {
     formData.append("jobId", id);
 
     try {
+      const token = localStorage.getItem("token");
       const { data } = await axios.post(
         "https://yourhr-backend-dsxg.onrender.com/api/v1/application/post",
         formData,
         {
-          withCredentials: true,
           headers: {
             "Content-Type": "multipart/form-data",
+            "Authorization": `Bearer ${token}`,
           },
         }
       );
+
       setName("");
       setEmail("");
       setCoverLetter("");
       setPhone("");
       setAddress("");
-      setResume("");
+      setResume(null);
+
       toast.success(data.message);
-      navigateTo("/job/getall");
+      navigate("/job/getall");
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Application failed");
     }
   };
 
+  // Redirect unauthorized users
   if (!isAuthorized || (user && user.role === "Employer")) {
-    navigateTo("/");
+    return <Navigate to="/" />;
   }
 
   return (
-    <section className="application"
-    style={{
-      backgroundImage: `url(${bg3image})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      padding: '75px 0 50px 0',
-      position: 'relative',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
+    <section
+      className="application"
+      style={{
+        backgroundImage: `url(${bg3image})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        padding: '75px 0 50px 0',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <div className="container">
         <h3>Application Form</h3>
         <form onSubmit={handleApplication}>
@@ -82,29 +95,34 @@ const Application = () => {
             placeholder="Your Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
           />
           <input
             type="email"
             placeholder="Your Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
           <input
-            type="number"
+            type="tel"
             placeholder="Your Phone Number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            required
           />
           <input
             type="text"
             placeholder="Your Address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
+            required
           />
           <textarea
-            placeholder="CoverLetter..."
+            placeholder="Cover Letter..."
             value={coverLetter}
             onChange={(e) => setCoverLetter(e.target.value)}
+            required
           />
           <div>
             <label
@@ -117,6 +135,7 @@ const Application = () => {
               accept=".pdf, .jpg, .png"
               onChange={handleFileChange}
               style={{ width: "100%" }}
+              required
             />
           </div>
           <button type="submit">Send Application</button>

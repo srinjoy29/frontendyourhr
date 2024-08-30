@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Context } from "../../main";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -15,24 +15,25 @@ const Navbar = () => {
       const response = await axios.get(
         "https://yourhr-backend-dsxg.onrender.com/api/v1/user/logout",
         {
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
+          },
           withCredentials: true,
         }
       );
       toast.success(response.data.message);
       setIsAuthorized(false);
+      localStorage.removeItem("token"); // Remove the token from local storage
       navigateTo("/login");
     } catch (error) {
-      toast.error(error.response.data.message), setIsAuthorized(true);
+      toast.error(error.response.data.message);
+      // Maintain authorization state if there's an error during logout
     }
   };
 
   return (
     <nav className={isAuthorized ? "navbarShow" : "navbarHide"}>
       <div className="container">
-        {/* <div className="logo">
-          <img src="/careerconnect-white.png" alt="logo" />
-        
-        </div> */}
         <div className="logo-title">
           <h4>YOURHR</h4>
         </div>
@@ -70,7 +71,6 @@ const Navbar = () => {
           ) : (
             <></>
           )}
-
           <button onClick={handleLogout}>LOGOUT</button>
         </ul>
         <div className="hamburger">
