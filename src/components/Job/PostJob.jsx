@@ -32,7 +32,7 @@ const PostJob = () => {
     }
     await axios
       .post(
-        "https://yourhr-backend-dsxg.onrender.com/api/v1/job/post",
+        "http://yourhr-backend-dsxg.onrender.com/api/v1/job/post",
         fixedSalary.length >= 4
           ? {
               title,

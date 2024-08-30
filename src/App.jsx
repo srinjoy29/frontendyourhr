@@ -23,7 +23,7 @@ const App = () => {
     const fetchUser = async () => {
       try {
         const response = await axios.get(
-          "https://yourhr-backend-dsxg.onrender.com/api/v1/user/getuser",
+          "http://yourhr-backend-dsxg.onrender.com/api/v1/user/getuser",
           {
             withCredentials: true,
           }
