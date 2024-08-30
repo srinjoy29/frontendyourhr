@@ -2,8 +2,12 @@ import React, { createContext, useState } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 
+// Create a context with a default value
 export const Context = createContext({
   isAuthorized: false,
+  setIsAuthorized: () => {},
+  user: {},
+  setUser: () => {},
 });
 
 const AppWrapper = () => {
