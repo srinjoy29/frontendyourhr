@@ -48,13 +48,7 @@ const Navbar = () => {
               ALL JOBS
             </Link>
           </li>
-          <li>
-            <Link to={"/applications/me"} onClick={() => setShow(false)}>
-              {user && user.role === "Employer"
-                ? "APPLICATIONS"
-                : "MY APPLICATIONS"}
-            </Link>
-          </li>
+          
           {user && user.role === "Employer" ? (
             <>
               <li>
@@ -62,11 +56,7 @@ const Navbar = () => {
                   POST JOB
                 </Link>
               </li>
-              <li>
-                <Link to={"/job/me"} onClick={() => setShow(false)}>
-                  VIEW JOBS
-                </Link>
-              </li>
+              
             </>
           ) : (
             <></>
