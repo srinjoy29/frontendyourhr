@@ -13,6 +13,12 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (!role) {
+      toast.error("Please select a role");
+      return;
+    }
+
     try {
       const { data } = await axios.post(
         "https://yourhr-backend-dsxg.onrender.com/api/v1/user/login",
@@ -35,7 +41,7 @@ const Login = () => {
   };
 
   if (isAuthorized) {
-    return <Navigate to="/Home" />;
+    return <Navigate to="/" />;
   }
 
   return (
@@ -72,16 +78,14 @@ const Login = () => {
             <div>
               <input
                 type="password"
-                placeholder="Enter your Password"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
           </div>
-          <button type="submit">
-            Login
-          </button>
+          <button type="submit">Login</button>
           <Link to="/register">Register Now</Link>
         </form>
       </div>
